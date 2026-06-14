@@ -14,6 +14,16 @@ def load_data():
 
 df = load_data()
 
+# --- PERBAIKAN UTAMA: Kita ganti nama kolom dari CSV agar sesuai dengan nama Indonesia yang kamu mau ---
+df = df.rename(columns={
+    'Fire_Rate': 'Kecepatan Menembak',
+    'Magazine_Size': 'Jumlah Peluru',
+    'Range Meter': 'Jarak Tembakan',
+    'Damage_Head': 'Headshot',
+    'Damage_Body': 'Bodyshot',
+    'Damage_Leg': 'Lowshot'
+})
+
 # --- SIDEBAR: PENGATURAN BOBOT NILAI ---
 st.sidebar.header("⚙️ Atur Kriteria Kamu")
 st.sidebar.write("Geser slider untuk menentukan seberapa penting status ini bagimu (0 = Tidak Penting, 1 = Sangat Penting).")
@@ -26,7 +36,7 @@ w_body = st.sidebar.slider("Pentingnya Bodyshot", 0.0, 1.0, 0.7)
 w_leg = st.sidebar.slider("Pentingnya Lowshot", 0.0, 1.0, 0.3)
 
 # --- PERHITUNGAN SKOR SENJATA ---
-# Kita normalkan datanya dulu agar perhitungannya adil (Damage ratusan vs Fire Rate belasan)
+# Kita normalkan datanya dulu agar perhitungannya adil
 cols_to_norm = ['Kecepatan Menembak', 'Jumlah Peluru', 'Jarak Tembakan', 'Headshot', 'Bodyshot', 'Lowshot']
 df_norm = df.copy()
 
@@ -40,12 +50,12 @@ for col in cols_to_norm:
 
 # Hitung nilai mentah berdasarkan settingan dari user
 raw_score = (
-    df_norm['Kecepatan Menembka'] * w_fire +
+    df_norm['Kecepatan Menembak'] * w_fire +  # Typo 'Menembka' sudah diperbaiki
     df_norm['Jumlah Peluru'] * w_mag +
-    df_norm['Jarak Tembakan'] *w_jar +
-    df_norm['Damage_Head'] * w_head +
-    df_norm['Damage_Body'] * w_body +
-    df_norm['Damage_Leg'] * w_leg
+    df_norm['Jarak Tembakan'] * w_jar +
+    df_norm['Headshot'] * w_head +            # Nama sudah disamakan dengan bahasa Indonesia
+    df_norm['Bodyshot'] * w_body +            # Nama sudah disamakan dengan bahasa Indonesia
+    df_norm['Lowshot'] * w_leg                # Nama sudah disamakan dengan bahasa Indonesia
 )
 
 # Konversi ke skala 0 - 100 agar mudah dibaca

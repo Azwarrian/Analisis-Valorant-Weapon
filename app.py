@@ -1,81 +1,141 @@
 import streamlit as st
+
 import pandas as pd
 
+
+
 # Konfigurasi Halaman
+
 st.set_page_config(page_title="Valorant Weapon Rater", layout="wide")
 
+
+
 st.title("🎯 Valorant Weapon Rater")
+
 st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bagus** berdasarkan kriteria gaya bermainmu!")
 
+
+
 # Memuat Data
+
 @st.cache_data
+
 def load_data():
+
     return pd.read_csv("Valorant Weapon - Weapon.csv")
+
+
 
 df = load_data()
 
-# --- PERBAIKAN UTAMA: Kita ganti nama kolom dari CSV agar sesuai dengan nama Indonesia yang kamu mau ---
-df = df.rename(columns={
-    'Fire_Rate': 'Kecepatan Menembak',
-    'Magazine_Size': 'Jumlah Peluru',
-    'Range Meter': 'Jarak Tembakan',
-    'Damage_Head': 'Headshot',
-    'Damage_Body': 'Bodyshot',
-    'Damage_Leg': 'Lowshot'
-})
+
 
 # --- SIDEBAR: PENGATURAN BOBOT NILAI ---
+
 st.sidebar.header("⚙️ Atur Kriteria Kamu")
+
 st.sidebar.write("Geser slider untuk menentukan seberapa penting status ini bagimu (0 = Tidak Penting, 1 = Sangat Penting).")
 
+
+
 w_fire = st.sidebar.slider("Pentingnya Kecepatan Menembak", 0.0, 1.0, 0.8)
+
 w_mag = st.sidebar.slider("Pentingnya Jumlah Peluru", 0.0, 1.0, 0.4)
+
 w_jar = st.sidebar.slider("Pentingnya Jarak Tembakan", 0.0, 1.0, 1.0)
+
 w_head = st.sidebar.slider("Pentingnya Headshot", 0.0, 1.0, 1.0)
+
 w_body = st.sidebar.slider("Pentingnya Bodyshot", 0.0, 1.0, 0.7)
+
 w_leg = st.sidebar.slider("Pentingnya Lowshot", 0.0, 1.0, 0.3)
 
+
+
 # --- PERHITUNGAN SKOR SENJATA ---
-# Kita normalkan datanya dulu agar perhitungannya adil
+
+# Kita normalkan datanya dulu agar perhitungannya adil (Damage ratusan vs Fire Rate belasan)
+
 cols_to_norm = ['Kecepatan Menembak', 'Jumlah Peluru', 'Jarak Tembakan', 'Headshot', 'Bodyshot', 'Lowshot']
+
 df_norm = df.copy()
 
+
+
 for col in cols_to_norm:
+
     min_val = df[col].min()
+
     max_val = df[col].max()
+
     if max_val > min_val:
+
         df_norm[col] = (df[col] - min_val) / (max_val - min_val)
+
     else:
+
         df_norm[col] = 0
 
+
+
 # Hitung nilai mentah berdasarkan settingan dari user
+
 raw_score = (
-    df_norm['Kecepatan Menembak'] * w_fire +  # Typo 'Menembka' sudah diperbaiki
+
+    df_norm['Kecepatan Menembka'] * w_fire +
+
     df_norm['Jumlah Peluru'] * w_mag +
-    df_norm['Jarak Tembakan'] * w_jar +
-    df_norm['Headshot'] * w_head +            # Nama sudah disamakan dengan bahasa Indonesia
-    df_norm['Bodyshot'] * w_body +            # Nama sudah disamakan dengan bahasa Indonesia
-    df_norm['Lowshot'] * w_leg                # Nama sudah disamakan dengan bahasa Indonesia
+
+    df_norm['Jarak Tembakan'] *w_jar +
+
+    df_norm['Damage_Head'] * w_head +
+
+    df_norm['Damage_Body'] * w_body +
+
+    df_norm['Damage_Leg'] * w_leg
+
 )
 
+
+
 # Konversi ke skala 0 - 100 agar mudah dibaca
+
 if raw_score.max() > 0:
+
     df['Skor (0-100)'] = (raw_score / raw_score.max()) * 100
+
 else:
+
     df['Skor (0-100)'] = 0
+
+
 
 df['Skor (0-100)'] = df['Skor (0-100)'].round(2)
 
+
+
 # Urutkan senjata dari skor yang paling bagus (tertinggi)
+
 df_sorted = df.sort_values(by='Skor (0-100)', ascending=False).reset_index(drop=True)
 
+
+
 # --- TAMPILAN HASIL ---
+
 st.subheader("🏆 Peringkat Senjata Terbaik")
+
 st.write("Semakin tinggi skornya, semakin bagus senjata tersebut berdasarkan kriteria yang kamu atur di samping.")
 
+
+
 # Tampilkan sebagai tabel
+
 st.dataframe(df_sorted[['Weapon', 'Category', 'Skor (0-100)', 'Jarak Tembakan', 'Headshot', 'Bodyshot']], use_container_width=True)
 
+
+
 # Tampilkan sebagai grafik
+
 st.subheader("📊 Top 10 Senjata Pilihanmu")
+
 st.bar_chart(data=df_sorted.head(10), x='Weapon', y='Skor (0-100)', use_container_width=True)

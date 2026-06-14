@@ -42,7 +42,7 @@ for col in cols_to_norm:
 raw_score = (
     df_norm['Kecepatan Menembka'] * w_fire +
     df_norm['Jumlah Peluru'] * w_mag +
-    df_norm{'Jarak Tembakan'] *w_jar +
+    df_norm['Jarak Tembakan'] *w_jar +
     df_norm['Damage_Head'] * w_head +
     df_norm['Damage_Body'] * w_body +
     df_norm['Damage_Leg'] * w_leg

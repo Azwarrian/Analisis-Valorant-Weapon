@@ -6,14 +6,14 @@ st.set_page_config(page_title="Valorant Weapon Analyzer", layout="wide")
 
 # Tentukan URL gambar latar belakang kamu di sini
 # Pastikan gambar tersebut memiliki lisensi yang sesuai dan bisa diakses secara publik
-IMAGE_URL = "https://valorant.fandom.com/wiki/VALORANT"
+IMAGE_URL = "Valo.jpg"
 
 # Terapkan CSS kustom untuk latar belakang penuh
 st.markdown(
     f"""
     <style>
     .stApp {{
-     background-image: url("{https://valorant.fandom.com/wiki/VALORANT}");
+     background-image: url("{IMAGE_URL}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;

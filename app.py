@@ -6,7 +6,7 @@ st.set_page_config(page_title="Valorant Weapon Analyzer", layout="wide")
 
 # Tentukan URL gambar latar belakang kamu di sini
 # Pastikan gambar tersebut memiliki lisensi yang sesuai dan bisa diakses secara publik
-IMAGE_URL = "https://i.pinimg.com/736x/62/84/0f/62840f8f26a926e4d7a4258697628e9b.jpg"
+IMAGE_URL = "https://i.pinimg.com/736x/56/36/35/563635cbee52e246228835bd0d9c8d3a.jpg"
 
 # Terapkan CSS kustom untuk latar belakang penuh
 st.markdown(

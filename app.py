@@ -10,7 +10,7 @@ st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bag
 # Memuat Data
 @st.cache_data
 def load_data():
-    return pd.read_csv("Valorant Weapon - Weapon (1).csv")
+    return pd.read_csv("Valorant Weapon - Weapon.csv")
 
 df = load_data()
 
@@ -18,15 +18,16 @@ df = load_data()
 st.sidebar.header("⚙️ Atur Kriteria Kamu")
 st.sidebar.write("Geser slider untuk menentukan seberapa penting status ini bagimu (0 = Tidak Penting, 1 = Sangat Penting).")
 
-w_fire = st.sidebar.slider("Pentingnya Fire Rate", 0.0, 1.0, 0.8)
-w_mag = st.sidebar.slider("Pentingnya Magazine Size", 0.0, 1.0, 0.4)
-w_head = st.sidebar.slider("Pentingnya Damage Head", 0.0, 1.0, 1.0)
-w_body = st.sidebar.slider("Pentingnya Damage Body", 0.0, 1.0, 0.7)
-w_leg = st.sidebar.slider("Pentingnya Damage Leg", 0.0, 1.0, 0.3)
+w_fire = st.sidebar.slider("Pentingnya Kecepatan Menembak", 0.0, 1.0, 0.8)
+w_mag = st.sidebar.slider("Pentingnya Jumlah Peluru", 0.0, 1.0, 0.4)
+w_jar = st.sidebar.slider("Pentingnya Jarak Tembakan", 0.0, 1.0, 1.0)
+w_head = st.sidebar.slider("Pentingnya Headshot", 0.0, 1.0, 1.0)
+w_body = st.sidebar.slider("Pentingnya Bodyshot", 0.0, 1.0, 0.7)
+w_leg = st.sidebar.slider("Pentingnya Lowshot", 0.0, 1.0, 0.3)
 
 # --- PERHITUNGAN SKOR SENJATA ---
 # Kita normalkan datanya dulu agar perhitungannya adil (Damage ratusan vs Fire Rate belasan)
-cols_to_norm = ['Fire_Rate', 'Magazine_Size', 'Damage_Head', 'Damage_Body', 'Damage_Leg']
+cols_to_norm = ['Kecepatan Menembak', 'Jumlah Peluru', 'Jarak Tembakan', 'Headshot', 'Bodyshot', 'Lowshot']
 df_norm = df.copy()
 
 for col in cols_to_norm:
@@ -39,8 +40,9 @@ for col in cols_to_norm:
 
 # Hitung nilai mentah berdasarkan settingan dari user
 raw_score = (
-    df_norm['Fire_Rate'] * w_fire +
-    df_norm['Magazine_Size'] * w_mag +
+    df_norm['Kecepatan Menembka'] * w_fire +
+    df_norm['Jumlah Peluru'] * w_mag +
+    df_norm{'Jarak Tembakan'] *w_jar +
     df_norm['Damage_Head'] * w_head +
     df_norm['Damage_Body'] * w_body +
     df_norm['Damage_Leg'] * w_leg
@@ -62,7 +64,7 @@ st.subheader("🏆 Peringkat Senjata Terbaik")
 st.write("Semakin tinggi skornya, semakin bagus senjata tersebut berdasarkan kriteria yang kamu atur di samping.")
 
 # Tampilkan sebagai tabel
-st.dataframe(df_sorted[['Weapon', 'Category', 'Skor (0-100)', 'Fire_Rate', 'Damage_Head', 'Damage_Body']], use_container_width=True)
+st.dataframe(df_sorted[['Weapon', 'Category', 'Skor (0-100)', 'Jarak Tembakan', 'Headshot', 'Bodyshot']], use_container_width=True)
 
 # Tampilkan sebagai grafik
 st.subheader("📊 Top 10 Senjata Pilihanmu")

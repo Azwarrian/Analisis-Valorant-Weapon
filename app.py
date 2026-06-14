@@ -1,61 +1,69 @@
 import streamlit as st
 import pandas as pd
-import joblib
 
-st.title("🔫 Valorant Weapon ML Clustering")
-st.write("Aplikasi ini menggunakan Machine Learning (K-Means) untuk mengelompokkan senjata Valorant berdasarkan kemiripan statistiknya.")
+# Konfigurasi Halaman
+st.set_page_config(page_title="Valorant Weapon Rater", layout="wide")
 
-# 1. Load Data dan Model ML
+st.title("🎯 Valorant Weapon Rater")
+st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bagus** berdasarkan kriteria gaya bermainmu!")
+
+# Memuat Data
 @st.cache_data
 def load_data():
-    return pd.read_csv('Valorant Weapon - Weapon.csv')
-
-@st.cache_resource
-def load_models():
-    # Memuat model K-Means dan Scaler dari file .pkl
-    kmeans = joblib.load('kmeans_weapon_model.pkl')
-    scaler = joblib.load('weapon_scaler.pkl')
-    return kmeans, scaler
+    return pd.read_csv("Valorant Weapon - Weapon.csv")
 
 df = load_data()
-kmeans, scaler = load_models()
 
-# 2. Persiapkan Data untuk ML
-features = df[['Fire_Rate', 'Magazine_Size', 'Damage_Head', 'Damage_Body', 'Damage_Leg']]
-scaled_features = scaler.transform(features) # Gunakan scaler yang sama dari Colab
+# --- SIDEBAR: PENGATURAN BOBOT NILAI ---
+st.sidebar.header("⚙️ Atur Kriteria Kamu")
+st.sidebar.write("Geser slider untuk menentukan seberapa penting status ini bagimu (0 = Tidak Penting, 1 = Sangat Penting).")
 
-# 3. Lakukan Prediksi (Clustering)
-df['ML_Cluster'] = kmeans.predict(scaled_features)
+w_fire = st.sidebar.slider("Pentingnya Fire Rate", 0.0, 1.0, 0.8)
+w_mag = st.sidebar.slider("Pentingnya Magazine Size", 0.0, 1.0, 0.4)
+w_head = st.sidebar.slider("Pentingnya Damage Head", 0.0, 1.0, 1.0)
+w_body = st.sidebar.slider("Pentingnya Damage Body", 0.0, 1.0, 0.7)
+w_leg = st.sidebar.slider("Pentingnya Damage Leg", 0.0, 1.0, 0.3)
 
-# Ubah angka cluster (0, 1, 2) menjadi nama yang lebih keren
-cluster_names = {
-    0: "Tipe A (Balanced/Rifle)",
-    1: "Tipe B (High Damage/Sniper)",
-    2: "Tipe C (High Fire Rate/SMG)"
-}
-df['Tipe Senjata (ML)'] = df['ML_Cluster'].map(cluster_names)
+# --- PERHITUNGAN SKOR SENJATA ---
+# Kita normalkan datanya dulu agar perhitungannya adil (Damage ratusan vs Fire Rate belasan)
+cols_to_norm = ['Fire_Rate', 'Magazine_Size', 'Damage_Head', 'Damage_Body', 'Damage_Leg']
+df_norm = df.copy()
 
-# 4. Tampilkan Hasil
-st.subheader("📊 Hasil Pengelompokan Machine Learning")
-st.dataframe(df[['Weapon', 'Category', 'Tipe Senjata (ML)', 'Fire_Rate', 'Damage_Head']], use_container_width=True)
+for col in cols_to_norm:
+    min_val = df[col].min()
+    max_val = df[col].max()
+    if max_val > min_val:
+        df_norm[col] = (df[col] - min_val) / (max_val - min_val)
+    else:
+        df_norm[col] = 0
 
-# 5. Fitur Interaktif: Prediksi Senjata Kustom
-st.sidebar.header("Tebak Cluster Senjata Kustom")
-st.sidebar.write("Masukkan status senjata buatanmu, dan ML akan menebak ini masuk tipe apa!")
+# Hitung nilai mentah berdasarkan settingan dari user
+raw_score = (
+    df_norm['Fire_Rate'] * w_fire +
+    df_norm['Magazine_Size'] * w_mag +
+    df_norm['Damage_Head'] * w_head +
+    df_norm['Damage_Body'] * w_body +
+    df_norm['Damage_Leg'] * w_leg
+)
 
-in_fire = st.sidebar.number_input("Fire Rate", min_value=0.0, value=10.0)
-in_mag = st.sidebar.number_input("Magazine Size", min_value=1, value=25)
-in_head = st.sidebar.number_input("Damage Head", min_value=0, value=150)
-in_body = st.sidebar.number_input("Damage Body", min_value=0, value=40)
-in_leg = st.sidebar.number_input("Damage Leg", min_value=0, value=30)
+# Konversi ke skala 0 - 100 agar mudah dibaca
+if raw_score.max() > 0:
+    df['Skor (0-100)'] = (raw_score / raw_score.max()) * 100
+else:
+    df['Skor (0-100)'] = 0
 
-if st.sidebar.button("Prediksi Tipe"):
-    # Buat array data baru
-    new_weapon = pd.DataFrame([[in_fire, in_mag, in_head, in_body, in_leg]], 
-                              columns=['Fire_Rate', 'Magazine_Size', 'Damage_Head', 'Damage_Body', 'Damage_Leg'])
-    
-    # Scale data baru lalu prediksi
-    new_scaled = scaler.transform(new_weapon)
-    prediction = kmeans.predict(new_scaled)[0]
-    
-    st.sidebar.success(f"Senjata buatanmu masuk kategori: **{cluster_names[prediction]}**")
+df['Skor (0-100)'] = df['Skor (0-100)'].round(2)
+
+# Urutkan senjata dari skor yang paling bagus (tertinggi)
+df_sorted = df.sort_values(by='Skor (0-100)', ascending=False).reset_index(drop=True)
+
+# --- TAMPILAN HASIL ---
+st.subheader("🏆 Peringkat Senjata Terbaik")
+st.write("Semakin tinggi skornya, semakin bagus senjata tersebut berdasarkan kriteria yang kamu atur di samping.")
+
+# Tampilkan sebagai tabel
+st.dataframe(df_sorted[['Weapon', 'Category', 'Skor (0-100)', 'Fire_Rate', 'Damage_Head', 'Damage_Body']], use_container_width=True)
+
+# Tampilkan sebagai grafik
+st.subheader("📊 Top 10 Senjata Pilihanmu")
+st.bar_chart(data=df_sorted.head(10), x='Weapon', y='Skor (0-100)', use_container_width=True)

@@ -13,7 +13,7 @@ st.markdown(
     f"""
     <style>
     .stApp {{
-     background-image: url("https://valorant.fandom.com/wiki/VALORANT");
+     background-image: url("{https://valorant.fandom.com/wiki/VALORANT}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;

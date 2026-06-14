@@ -10,7 +10,7 @@ st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bag
 # Memuat Data
 @st.cache_data
 def load_data():
-    return pd.read_csv("Valorant Weapon - Weapon.csv")
+    return pd.read_csv("Valorant Weapon - Weapon (1).csv")
 
 df = load_data()
 

@@ -4,13 +4,25 @@ import pandas as pd
 # Konfigurasi Halaman
 st.set_page_config(page_title="Valorant Weapon Analyzer", layout="wide")
 
-# Membagi layar menjadi dua kolom: kecil untuk ikon, besar untuk teks
-col1, col2 = st.columns([1, 15]) 
+# Tentukan URL gambar latar belakang kamu di sini
+# Pastikan gambar tersebut memiliki lisensi yang sesuai dan bisa diakses secara publik
+IMAGE_URL = "Valo.jpg"
 
-with col1:
-    # Masukkan path gambar ikon Valorant kamu (misal logo V, ikon rank, dll)
-    # Gunakan file .png dengan latar belakang transparan
-    st.image("Valo.jpg", width=45)
+# Terapkan CSS kustom untuk latar belakang penuh
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background-image:"Valo.jpg";
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("🎯 Valorant Weapon Analyzer")
 st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bagus** berdasarkan kriteria gaya bermainmu!")

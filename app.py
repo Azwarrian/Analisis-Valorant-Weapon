@@ -2,9 +2,17 @@ import streamlit as st
 import pandas as pd
 
 # Konfigurasi Halaman
-st.set_page_config(page_title="Valorant Weapon Rater", layout="wide")
+st.set_page_config(page_title="Valorant Weapon Analyzer", layout="wide")
 
-st.title("🎯 Valorant Weapon Rater")
+# Membagi layar menjadi dua kolom: kecil untuk ikon, besar untuk teks
+col1, col2 = st.columns([1, 15]) 
+
+with col1:
+    # Masukkan path gambar ikon Valorant kamu (misal logo V, ikon rank, dll)
+    # Gunakan file .png dengan latar belakang transparan
+    st.image("Valo.jpg", width=45)
+
+st.title("🎯 Valorant Weapon Analyzer")
 st.write("Aplikasi ini membantu kamu mencari tahu **senjata mana yang paling bagus** berdasarkan kriteria gaya bermainmu!")
 
 # Memuat Data
